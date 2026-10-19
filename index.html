@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChapaLab — Diseña tus chapas</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5b4bdb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fff8f1;
+  --panel: #ffffff;
+  --text: #272044;
+  --muted: #746d88;
+  --line: #eee5f7;
+  --accent: #7047eb;
+  --accent-ink: #ffffff;
+  --pink: #ff6f91;
+  --yellow: #ffd84d;
+  --mint: #4bd9c0;
+  --blue: #59b8ff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "Trebuchet MS", ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, input, select { font: inherit; }
+.app { min-height: 100vh; background: radial-gradient(circle at 8% 15%, #ffe0e9 0, transparent 18rem), radial-gradient(circle at 94% 28%, #d9f8f2 0, transparent 17rem), var(--bg); }
+header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px clamp(16px, 4vw, 48px); border-bottom:2px solid #f2e7ff; background:rgba(255,255,255,.88); box-shadow:0 5px 20px #5c3f8b0b; }
+.brand { display:flex; align-items:center; gap:12px; }
+.logo { display:grid; place-items:center; width:48px; height:48px; border-radius:17px; background:linear-gradient(145deg, #ff7198, #ffad66); color:#fff; font-size:25px; font-weight:1000; box-shadow:0 5px 0 #e85e85; transform:rotate(-5deg); }
+h1 { font-size:23px; margin:0; letter-spacing:-.05em; font-weight:900; }
+.subtitle { margin:3px 0 0; color:var(--muted); font-size:13px; }
+.header-tag { color:#5c43c8; font-size:12px; font-weight:850; letter-spacing:.04em; padding:9px 13px; border-radius:999px; background:#f0eaff; }
+main { max-width:1120px; margin:0 auto; padding:28px clamp(16px, 4vw, 36px) 48px; }
+.intro { margin-bottom:22px; padding:23px 25px; border-radius:24px; background:linear-gradient(110deg,#7047eb 0%,#9365f3 52%,#ff82a1 100%); color:#fff; box-shadow:0 12px 25px #7047eb22; position:relative; overflow:hidden; }
+.intro:after { content:'✦  ●  ✿'; position:absolute; right:18px; top:12px; font-size:25px; letter-spacing:10px; opacity:.5; transform:rotate(12deg); }
+h2 { margin:0 0 8px; font-size:clamp(25px, 3.5vw, 34px); letter-spacing:-.05em; font-weight:900; }
+.intro p { color:#f8f4ff; margin:0; line-height:1.55; max-width:680px; }
+.workspace { display:grid; grid-template-columns:minmax(0, 1.15fr) minmax(280px, .85fr); gap:20px; align-items:start; }
+.panel { border:2px solid #f0e7fb; background:var(--panel); border-radius:25px; padding:20px; min-width:0; box-shadow:0 10px 28px #57407b0a; }
+.panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; }
+.panel h3 { font-size:16px; margin:0; font-weight:900; }
+.step { color:#6b4de0; font-size:10px; font-weight:900; letter-spacing:.08em; background:#f1edff; padding:7px 10px; border-radius:999px; }
+.stage { position:relative; display:grid; place-items:center; min-height:365px; border-radius:20px; overflow:hidden; background:radial-gradient(circle at 15% 20%, #ffe3ec 0 8px, transparent 9px),radial-gradient(circle at 82% 75%, #d8f8f1 0 10px, transparent 11px), repeating-linear-gradient(0deg, transparent, transparent 23px, #7047eb0c 24px), repeating-linear-gradient(90deg, transparent, transparent 23px, #7047eb0c 24px), #fff9fd; }
+#cropCircle { position:relative; width:250px; height:250px; max-width:80vw; max-height:80vw; border-radius:50%; overflow:hidden; background:#ffe5ed; box-shadow:0 12px 30px #39265b24; border:5px solid #fff; outline:3px solid #ffd84d; touch-action:none; cursor:grab; }
+#cropCircle:active { cursor:grabbing; }
+#cropCircle img { position:absolute; max-width:none; user-select:none; -webkit-user-drag:none; pointer-events:none; }
+.empty-state { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; color:#7c7292; padding:20px; pointer-events:none; }
+.empty-state:before { content:'📸'; font-size:35px; }
+.empty-state strong { color:#44336c; font-size:15px; }
+.empty-state span { font-size:12px; max-width:185px; line-height:1.45; }
+.stage-hint { margin:12px 0 0; text-align:center; color:var(--muted); font-size:12px; }
+.upload { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:14px 16px; margin-top:16px; border:2px dashed #b7a2ff; border-radius:16px; color:#6040d5; background:#f5f0ff; cursor:pointer; font-weight:850; transition:transform .15s,background .15s; }
+.upload:hover { background:#eee6ff; transform:translateY(-1px); }
+.upload input { display:none; }
+.controls { display:grid; gap:19px; }
+.control-block { padding-bottom:17px; border-bottom:2px dashed #eee5f7; }
+.control-block:last-of-type { border-bottom:0; padding-bottom:0; }
+.label-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:11px; font-size:13px; font-weight:850; }
+.muted { color:var(--muted); font-size:12px; font-weight:500; }
+.sizes { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.size-option { padding:12px 5px 10px; border:2px solid #eee5f7; background:#fffaff; border-radius:16px; cursor:pointer; color:var(--text); text-align:center; transition:transform .15s,border-color .15s; }
+.size-option:nth-child(1) { background:#fff0f4; }
+.size-option:nth-child(2) { background:#f0fffb; }
+.size-option:nth-child(3) { background:#fff9dd; }
+.size-option[aria-pressed="true"] { border-color:var(--accent); box-shadow:0 4px 0 #d5c7ff; transform:translateY(-2px); }
+.size-number { display:block; font-size:23px; font-weight:1000; letter-spacing:-.04em; }
+.size-unit { display:block; margin-top:2px; color:var(--muted); font-size:10px; }
+input[type=range] { width:100%; accent-color:var(--accent); }
+.range-labels { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-top:4px; }
+select { width:100%; padding:12px; border:2px solid #eee5f7; background:#fffaff; color:var(--text); border-radius:14px; }
+.primary { width:100%; padding:15px 16px; border:0; border-radius:16px; background:linear-gradient(100deg,#7047eb,#9b61f5); color:#fff; font-weight:900; cursor:pointer; box-shadow:0 5px 0 #5031b8; transition:transform .15s,box-shadow .15s; }
+.primary:hover { filter:brightness(1.05); transform:translateY(-1px); box-shadow:0 6px 0 #5031b8; }
+.secondary { width:100%; padding:12px 14px; border:2px solid #e8defb; border-radius:15px; background:#fff; color:#5a43a4; cursor:pointer; font-weight:800; }
+.secondary:hover { background:#f7f2ff; }
+.actions { display:grid; gap:10px; margin-top:2px; }
+.note { display:flex; gap:10px; margin-top:18px; padding:14px; border-radius:16px; background:#fff6d9; border:1px solid #ffe69a; color:#76643b; font-size:12px; line-height:1.55; }
+.note b { color:#493716; }
+#printArea { display:none; }
+@media(max-width:760px) { .workspace { grid-template-columns:1fr; } .stage { min-height:320px; } #cropCircle { width:240px; height:240px; } .header-tag { display:none; } main { padding-top:18px; } .intro { padding:21px 19px; } .intro:after { font-size:18px; right:12px; } }
+@media print {
+  @page { size:A4 portrait; margin:10mm; }
+  body { background:white !important; color:black !important; }
+  body * { visibility:hidden !important; }
+  #printArea, #printArea * { visibility:visible !important; }
+  #printArea { display:block !important; position:absolute; inset:0; width:190mm; min-height:277mm; background:white; color:black; }
+  .print-grid { display:grid; grid-template-columns:repeat(4, 1fr); align-content:start; justify-items:center; gap:5mm 2mm; }
+  .print-item { display:flex; flex-direction:column; align-items:center; gap:1mm; break-inside:avoid; }
+  .print-circle { overflow:hidden; border-radius:50%; position:relative; background:white; }
+  .print-circle img { position:absolute; max-width:none; }
+  .print-label { font:8pt Arial,sans-serif; color:#555; }
+  .print-title { font:12pt Arial,sans-serif; margin:0 0 2mm; }
+  .print-subtitle { font:8pt Arial,sans-serif; color:#555; margin:0 0 5mm; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">✦</div><div><h1>ChapaLab</h1><p class="subtitle">¡Diseña, juega y crea chapas únicas! 🌈</p></div></div>
+    <div class="header-tag">✨ ¡Tu mini taller creativo!</div>
+  </header>
+  <main>
+    <div class="intro"><h2>¡Vamos a crear algo genial! 🎨</h2><p>Sube tu foto favorita, dale tu toque y prepara chapas para compartir con tus amigos.</p></div>
+    <div class="workspace">
+      <section class="panel">
+        <div class="panel-head"><h3>🖼️ Tu diseño</h3><span class="step">01 / ENCUADRA</span></div>
+        <div class="stage">
+          <div id="cropCircle" aria-label="Arrastra la foto dentro del círculo">
+            <img id="photo" alt="" hidden>
+            <div class="empty-state" id="emptyState"><strong>Tu diseño irá aquí</strong><span>Sube una foto para empezar a encuadrarla.</span></div>
+          </div>
+        </div>
+        <p class="stage-hint">👆 Arrastra la foto con el dedo o el ratón para colocarla.</p>
+        <label class="upload">＋ Subir foto<input id="fileInput" type="file" accept="image/*"></label>
+      </section>
+      <section class="panel controls">
+        <div class="panel-head"><h3>🌟 Dale tu estilo</h3><span class="step">02 / AJUSTA</span></div>
+        <div class="control-block">
+          <div class="label-row"><span>Tamaño de chapa</span><span class="muted">Diámetro</span></div>
+          <div class="sizes">
+            <button class="size-option" data-mm="25" aria-pressed="false"><span class="size-number">25</span><span class="size-unit">mm · pequeña</span></button>
+            <button class="size-option" data-mm="37" aria-pressed="true"><span class="size-number">37</span><span class="size-unit">mm · mediana</span></button>
+            <button class="size-option" data-mm="58" aria-pressed="false"><span class="size-number">58</span><span class="size-unit">mm · grande</span></button>
+          </div>
+        </div>
+        <div class="control-block">
+          <div class="label-row"><label for="zoom">Zoom de la foto</label><span class="muted" id="zoomText">100%</span></div>
+          <input id="zoom" type="range" min="100" max="300" value="100" step="1">
+          <div class="range-labels"><span>Encajar</span><span>Acercar</span></div>
+        </div>
+        <div class="control-block">
+          <div class="label-row"><label for="copies">Copias del diseño actual</label><span class="muted">Repetición</span></div>
+          <select id="copies"><option value="1">1 chapa</option><option value="4">4 chapas</option><option value="8">8 chapas</option><option value="12" selected>12 chapas</option><option value="20">20 chapas</option><option value="24">24 chapas</option></select>
+          <button class="secondary" id="addDesignBtn" style="margin-top:10px">＋ Añadir este diseño a la hoja</button>
+          <div id="designStatus" class="muted" style="margin-top:8px">Aún no hay diseños guardados para combinar.</div>
+        </div>
+        <div class="control-block">
+          <div class="label-row"><label for="bleed">Margen extra para plegado</label><span class="muted" id="bleedText">6 mm por lado</span></div>
+          <input id="bleed" type="range" min="0" max="10" value="6" step="0.5">
+          <div class="range-labels"><span>0 mm</span><span>10 mm por lado</span></div>
+          <p class="muted" style="line-height:1.5;margin:10px 0 0">Plantilla de referencia We R Memory Keepers: círculo de papel de 35 mm para chapa de 25 mm, 49 mm para 37 mm y 70 mm para 58 mm. Puedes ajustar el margen, pero comprueba una prueba antes de producir varias.</p>
+        </div>
+        <div class="actions">
+          <button class="primary" id="printBtn">Preparar impresión A4 ↗</button>
+          <button class="secondary" id="resetBtn">Centrar foto de nuevo</button>
+          <button class="secondary" id="clearDesignsBtn">Vaciar diseños guardados</button>
+        </div>
+        <div class="note"><span>ⓘ</span><span><b>Impresión a escala real:</b> selecciona papel A4, escala 100% / “Tamaño real” y desactiva “Ajustar a página”. El círculo impreso incluye el margen de plegado. Haz una prueba con regla y con un recorte antes de fabricar varias chapas.</span></div>
+      </section>
+    </div>
+    <div id="printArea" aria-hidden="true"><h2 class="print-title">ChapaLab · Hoja de impresión</h2><p class="print-subtitle" id="printSubtitle"></p><div class="print-grid" id="printGrid"></div></div>
+  </main>
+</div>
+<script>
+(() => {
+  const circle = document.getElementById('cropCircle');
+  const photo = document.getElementById('photo');
+  const fileInput = document.getElementById('fileInput');
+  const emptyState = document.getElementById('emptyState');
+  const zoom = document.getElementById('zoom');
+  const zoomText = document.getElementById('zoomText');
+  const copies = document.getElementById('copies');
+  const printGrid = document.getElementById('printGrid');
+  let imageUrl = null;
+  let baseScale = 1;
+  let scale = 1;
+  let x = 0, y = 0;
+  let startX = 0, startY = 0, pointerX = 0, pointerY = 0;
+  let dragging = false;
+  let diameter = 37;
+  let savedDesigns = [];
+
+  function fitImage() {
+    if (!photo.naturalWidth) return;
+    const size = circle.clientWidth;
+    baseScale = Math.max(size / photo.naturalWidth, size / photo.naturalHeight);
+    scale = baseScale * (Number(zoom.value) / 100);
+    x = (size - photo.naturalWidth * scale) / 2;
+    y = (size - photo.naturalHeight * scale) / 2;
+    draw();
+  }
+  function draw() {
+    if (!photo.naturalWidth) return;
+    photo.style.width = (photo.naturalWidth * scale) + 'px';
+    photo.style.height = (photo.naturalHeight * scale) + 'px';
+    photo.style.left = x + 'px';
+    photo.style.top = y + 'px';
+    zoomText.textContent = zoom.value + '%';
+  }
+  function setSize(mm) {
+    diameter = Number(mm);
+    // Medidas de círculo de papel publicadas para la plantilla We R Memory Keepers.
+    const templateBleed = ({25: 5, 37: 6, 58: 6})[diameter];
+    document.getElementById('bleed').value = templateBleed;
+    document.getElementById('bleedText').textContent = templateBleed + ' mm por lado';
+    document.querySelectorAll('.size-option').forEach(btn => btn.setAttribute('aria-pressed', String(Number(btn.dataset.mm) === diameter)));
+    const stageSize = Math.min(250, Math.round(circle.parentElement.clientWidth * .78));
+    const displayPx = Math.min(stageSize, Math.max(120, diameter * 4.1));
+    circle.style.width = displayPx + 'px';
+    circle.style.height = displayPx + 'px';
+    if (photo.naturalWidth) fitImage();
+  }
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('Selecciona un archivo de imagen.'); return; }
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    imageUrl = URL.createObjectURL(file);
+    photo.onload = () => { photo.hidden = false; emptyState.hidden = true; zoom.value = 100; fitImage(); };
+    photo.src = imageUrl;
+  });
+  document.querySelectorAll('.size-option').forEach(btn => btn.addEventListener('click', () => setSize(btn.dataset.mm)));
+  document.getElementById('bleed').addEventListener('input', e => { document.getElementById('bleedText').textContent = e.target.value + ' mm por lado'; });
+  zoom.addEventListener('input', () => {
+    if (!photo.naturalWidth) { zoomText.textContent = zoom.value + '%'; return; }
+    const size = circle.clientWidth;
+    const oldScale = scale;
+    const nextScale = baseScale * Number(zoom.value) / 100;
+    const centerX = size / 2, centerY = size / 2;
+    x = centerX - (centerX - x) * (nextScale / oldScale);
+    y = centerY - (centerY - y) * (nextScale / oldScale);
+    scale = nextScale;
+    draw();
+  });
+  circle.addEventListener('pointerdown', e => {
+    if (!photo.naturalWidth) return;
+    dragging = true; pointerX = e.clientX; pointerY = e.clientY; startX = x; startY = y;
+    circle.setPointerCapture(e.pointerId);
+  });
+  circle.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    x = startX + e.clientX - pointerX;
+    y = startY + e.clientY - pointerY;
+    draw();
+  });
+  circle.addEventListener('pointerup', () => dragging = false);
+  circle.addEventListener('pointercancel', () => dragging = false);
+  document.getElementById('resetBtn').addEventListener('click', () => { zoom.value = 100; if (photo.naturalWidth) fitImage(); else zoomText.textContent = '100%'; });
+  function captureCurrentDesign() {
+    if (!photo.naturalWidth) { alert('Primero sube una foto para diseñar la chapa.'); return null; }
+    return {
+      src: photo.src,
+      naturalWidth: photo.naturalWidth,
+      naturalHeight: photo.naturalHeight,
+      scale: scale,
+      x: x,
+      y: y,
+      previewSize: circle.clientWidth,
+      diameter: diameter,
+      zoom: Number(zoom.value),
+      label: 'Diseño ' + (savedDesigns.length + 1)
+    };
+  }
+  function updateDesignStatus() {
+    const el = document.getElementById('designStatus');
+    el.textContent = savedDesigns.length ? savedDesigns.length + ' diseño(s) guardado(s). Se imprimirán una vez cada uno, además de las copias que indiques del diseño actual.' : 'Aún no hay diseños guardados para combinar.';
+  }
+  document.getElementById('addDesignBtn').addEventListener('click', () => {
+    const d = captureCurrentDesign();
+    if (!d) return;
+    savedDesigns.push(d);
+    updateDesignStatus();
+    document.getElementById('addDesignBtn').textContent = '✓ Diseño añadido (' + savedDesigns.length + ')';
+    setTimeout(() => { document.getElementById('addDesignBtn').textContent = '＋ Añadir este diseño a la hoja'; }, 1300);
+  });
+  document.getElementById('clearDesignsBtn').addEventListener('click', () => { savedDesigns = []; updateDesignStatus(); });
+  function buildPrint() {
+    const current = captureCurrentDesign();
+    if (!current) return false;
+    const all = [];
+    savedDesigns.forEach(d => all.push({...d}));
+    for (let i = 0; i < Number(copies.value); i++) all.push({...current});
+    printGrid.innerHTML = '';
+    const bleedMm = Number(document.getElementById('bleed').value);
+    document.getElementById('printSubtitle').textContent = 'Diámetro acabado: ' + diameter + ' mm · margen extra: ' + bleedMm + ' mm por lado · círculo de papel: ' + (diameter + 2 * bleedMm) + ' mm. Escala de impresión: 100%.';
+    const maxArt = Math.max(...all.map(d => d.diameter + 2 * bleedMm));
+    const cols = Math.max(1, Math.min(5, Math.floor(175 / (maxArt + 5))));
+    printGrid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    all.forEach((d, i) => {
+      const item = document.createElement('div');
+      item.className = 'print-item';
+      const artMm = d.diameter + 2 * bleedMm;
+      const factor = artMm / d.previewSize; // artwork fills the larger paper circle, providing bleed
+      const crop = document.createElement('div');
+      crop.className = 'print-circle';
+      crop.style.width = artMm + 'mm';
+      crop.style.height = artMm + 'mm';
+      const img = document.createElement('img');
+      img.src = d.src;
+      img.style.width = (d.naturalWidth * d.scale * factor) + 'mm';
+      img.style.height = (d.naturalHeight * d.scale * factor) + 'mm';
+      img.style.left = (d.x * factor) + 'mm';
+      img.style.top = (d.y * factor) + 'mm';
+      crop.appendChild(img);
+      item.appendChild(crop);
+      const label = document.createElement('div');
+      label.className = 'print-label';
+      label.textContent = d.diameter + ' mm · ' + (i + 1);
+      item.appendChild(label);
+      printGrid.appendChild(item);
+    });
+    return true;
+  }
+  document.getElementById('printBtn').addEventListener('click', () => { if (buildPrint()) window.print(); });
+  window.addEventListener('resize', () => { if (photo.naturalWidth) fitImage(); });
+  setSize(37);
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('No se pudo activar el modo sin conexión:', err)));
+}
+</script>
+</body>
+</html>
